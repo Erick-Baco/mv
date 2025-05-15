@@ -2,23 +2,39 @@ from model.riscv_simulator import RiscVSimulator
 
 # Programa de ejemplo: suma del 1 al 10
 example_program = """
-# Inicialización
-li a0, 0       # acumulador
-li a1, 1       # contador
-li a2, 10      # límite
+# Ejemplo 3: Mayor de tres números
+# Este programa encuentra el mayor de tres números
+#
+# Registros utilizados:
+# a0 (x10): Primer número y resultado final
+# a1 (x11): Segundo número
+# a2 (x12): Tercer número
+# a3 (x13): Mayor temporal
 
-loop:
-add a0, a0, a1
-addi a1, a1, 1
-ble a1, a2, loop
+mayor_de_tres:
+    li a0, 15      # Primer número
+    li a1, 7       # Segundo número
+    li a2, 42      # Tercer número
+    
+    mv a3, a0      # Inicializa mayor con el primer número
+    
+    bge a3, a1, check_third  # Si mayor >= segundo, salta
+    mv a3, a1      # Si no, actualiza mayor con segundo
+    
+check_third:
+    bge a3, a2, fin  # Si mayor >= tercero, salta
+    mv a3, a2      # Si no, actualiza mayor con tercero
+    
+fin:
+    mv a0, a3      # Mueve el resultado a a0 para retornar
+    
+    li a7, 1       # Código para imprimir entero
+    ecall          # Llamada al sistema para imprimir
+    
+    li a7, 10      # Código para terminar programa
+    ecall          # Llamada al sistema para terminar
 
-# Imprimir resultado
-li a7, 1
-ecall
 
-# Finalizar
-li a7, 10
-ecall
 """
 
 def main():
