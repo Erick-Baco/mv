@@ -67,7 +67,7 @@ Puedes agregar un archivo `example_program` en el directorio `example` para prob
 
 ## 👨‍💻 Autor
 
-* [ ] Eder Álvarez
+* [ ] Eder Alvarez
 * [ ] Erick Baco
 * [ ] Humberto Trujillo
 

@@ -69,12 +69,27 @@ class RiscVGUI(tk.Tk):
         def run():
             self.sim.running = True
             while self.sim.running and self.sim.pc in self.sim.instructions:
-                self.sim.executor.execute(self.sim.instructions[self.sim.pc])
-                self.update_state()
-                time.sleep(0.05)
+                instr = self.sim.instructions[self.sim.pc]
+
+                # Validación adicional: instrucción debe ser texto válido
+                if not isinstance(instr, str) or not instr.strip():
+                    self.print_output(f"Instrucción inválida en PC={self.sim.pc}: '{instr}'")
+                    self.sim.running = False
+                    break
+
+                try:
+                    self.sim.executor.execute(instr)
+                    self.update_state()
+                    time.sleep(0.05)
+                except Exception as e:
+                    self.print_output(f"Error durante ejecución: {e}")
+                    self.sim.running = False
+                    break
+
             self.print_output("Ejecución finalizada.")
 
         Thread(target=run).start()
+
 
     def step_program(self):
         if not self.sim.running:
@@ -103,25 +118,39 @@ if __name__ == "__main__":
     app = RiscVGUI()
     # # Puede poner cualquier programa aqui, solo omita las primeras comillas y al final no olvide cerrar el parentesis profe
     app.code_text.insert(tk.END, """\
-li f0, 1.5708         # 90 grados en radianes aprox (pi/2)
-fsin.s f1, f0         # f1 = sin(f0) ≈ 1.0
-fcos.s f2, f0         # f2 = cos(f0) ≈ 0.0
-ftan.s f3, f0         # f3 = tan(f0) ≈ muy grande
+    # Cargar enteros
+    li x5, 7          # x5 = 7
+    li x6, 3          # x6 = 3
+    add x7, x5, x6    # x7 = 10 (entero)
 
-fmv.s f10, f1         # mover f1 a fa0 para imprimir
-li a7, 2
-ecall                 # imprime sin(90°) ≈ 1.0000
+    # Mover resultado a a0 para imprimir
+    mv x10, x7        # a0 = x7
+    li a7, 1          # syscall imprimir entero
+    ecall
 
-fmv.s f10, f2
-li a7, 2
-ecall                 # imprime cos(90°) ≈ 0.0000
+    # Cargar floats
+    li f0, 2.5        # f0 = 2.5
+    li f1, 4.0        # f1 = 4.0
 
-fmv.s f10, f3
-li a7, 2
-ecall                 # imprime tan(90°) ≈ valor grande
+    # Sumar floats: f2 = f0 + f1
+    fadd.s f2, f0, f1
 
-li a7, 10
-ecall                 # termina
+    # Mover resultado float a fa0 (f10) para imprimir
+    fmv.s f10, f2
+    li a7, 2          # syscall imprimir float
+    ecall
+
+    # Restar floats: f3 = f1 - f0
+    fsub.s f3, f1, f0
+
+    # Imprimir resultado float
+    fmv.s f10, f3
+    li a7, 2
+    ecall
+
+    # Terminar programa
+    li a7, 10
+    ecall
 
 """)
     app.mainloop()
