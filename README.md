@@ -58,10 +58,9 @@ src/
 
 ```bash
 # Estando en la raíz del proyecto (donde está src/)
-python3 src/view/main.py
+python src/view/virtual_machine.py
 ```
 
-Puedes agregar un archivo `example_program` en el directorio `example` para probar diferentes códigos en ensamblador.
 
 ---
 
