@@ -62,6 +62,16 @@ class RiscVSimulator:
                 lines.append(f"f{i}: {self.fregisters[i]:.4f}")
 
             return "\n".join(lines)
+    
+    def limpiar_comentarios(codigo_raw: str) -> str:
+        """Devuelve el código sin todo lo que aparezca después de '#'."""
+        lineas_limpias = []
+        for linea in codigo_raw.split('\n'):
+            sin_com = linea.split('#', 1)[0].rstrip()
+            if sin_com:                       # descarta líneas vacías
+                lineas_limpias.append(sin_com)
+        return '\n'.join(lineas_limpias)
+
 
     def run(self):
         self.running = True

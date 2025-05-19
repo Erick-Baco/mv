@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import scrolledtext, messagebox
+from tkinter import scrolledtext, messagebox, filedialog
 from threading import Thread
 import time
 import sys
@@ -31,17 +31,25 @@ class RiscVGUI(tk.Tk):
         self.output_text = scrolledtext.ScrolledText(self, width=90, height=5, state='disabled', fg='green')
         self.output_text.grid(row=6, column=0, columnspan=2, padx=5, pady=5)
 
-        self.btn_load = tk.Button(self, text="Cargar Programa", command=self.load_program)
-        self.btn_load.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.btn_run = tk.Button(self, text="Ejecutar Todo", command=self.run_program)
-        self.btn_run.grid(row=1, column=2, padx=5, pady=5, sticky="ew")
+        self.btn_load_file = tk.Button(self, text="Cargar desde archivo", command=self.load_from_file)
+        self.btn_load_file.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+
+        self.btn_strip = tk.Button(self, text="Quitar comentarios", command=self.remove_comments)
+        self.btn_strip.grid(row=1, column=2, padx=5, pady=5, sticky="ew")        
+
+        self.btn_load = tk.Button(self, text="Cargar Programa", command=self.load_program)
+        self.btn_load.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
         self.btn_step = tk.Button(self, text="Paso a Paso", command=self.step_program)
-        self.btn_step.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
+        self.btn_step.grid(row=3, column=2, padx=5, pady=5, sticky="ew")
+
+        self.btn_run = tk.Button(self, text="Ejecutar Todo", command=self.run_program)
+        self.btn_run.grid(row=4, column=2, padx=5, pady=5, sticky="ew")
 
         self.btn_clear = tk.Button(self, text="Limpiar Consola", command=self.clear_output)
-        self.btn_clear.grid(row=3, column=2, padx=5, pady=5, sticky="ew")
+        self.btn_clear.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
+
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -64,6 +72,30 @@ class RiscVGUI(tk.Tk):
             self.update_state()
         except Exception as e:
             messagebox.showerror("Error al cargar programa", str(e))
+
+    def load_from_file(self):
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
+        )
+        if not file_path:
+            return
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                code = f.read()
+                self.code_text.delete(1.0, tk.END)
+                self.code_text.insert(tk.END, code)
+                self.print_output(f"Programa cargado desde: {file_path}")
+        except Exception as e:
+            messagebox.showerror("Error al cargar archivo", str(e))
+
+    def remove_comments(self):
+        raw_code = self.code_text.get(1.0, tk.END)
+        clean_code = RiscVSimulator.limpiar_comentarios(raw_code)
+        self.code_text.delete(1.0, tk.END)
+        self.code_text.insert(tk.END, clean_code)
+        self.print_output("Comentarios eliminados.")
+
 
     def run_program(self):
         def run():
@@ -116,41 +148,4 @@ class RiscVGUI(tk.Tk):
 
 if __name__ == "__main__":
     app = RiscVGUI()
-    # # Puede poner cualquier programa aqui, solo omita las primeras comillas y al final no olvide cerrar el parentesis profe
-    app.code_text.insert(tk.END, """\
-    # Cargar enteros
-    li x5, 7          # x5 = 7
-    li x6, 3          # x6 = 3
-    add x7, x5, x6    # x7 = 10 (entero)
-
-    # Mover resultado a a0 para imprimir
-    mv x10, x7        # a0 = x7
-    li a7, 1          # syscall imprimir entero
-    ecall
-
-    # Cargar floats
-    li f0, 2.5        # f0 = 2.5
-    li f1, 4.0        # f1 = 4.0
-
-    # Sumar floats: f2 = f0 + f1
-    fadd.s f2, f0, f1
-
-    # Mover resultado float a fa0 (f10) para imprimir
-    fmv.s f10, f2
-    li a7, 2          # syscall imprimir float
-    ecall
-
-    # Restar floats: f3 = f1 - f0
-    fsub.s f3, f1, f0
-
-    # Imprimir resultado float
-    fmv.s f10, f3
-    li a7, 2
-    ecall
-
-    # Terminar programa
-    li a7, 10
-    ecall
-
-""")
     app.mainloop()
