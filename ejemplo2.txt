@@ -1,0 +1,60 @@
+# Aproximación de PI usando la serie de Leibniz con 6 términos
+
+li f0, 0.0       # acumulador
+li f1, 1.0       # numerador (siempre 1.0)
+li f2, 1.0       # denominador actual (1, 3, 5...)
+li f3, 1.0       # signo
+li f4, 2.0       # para incrementar denominador (por 2)
+
+# --- Término 1 ---
+fdiv.s f5, f1, f2     # 1/1
+fmul.s f6, f5, f3     # * 1.0
+fadd.s f0, f0, f6     # acumular
+
+# --- Término 2 ---
+li f2, 3.0
+li f3, -1.0
+fdiv.s f5, f1, f2
+fmul.s f6, f5, f3
+fadd.s f0, f0, f6
+
+# --- Término 3 ---
+li f2, 5.0
+li f3, 1.0
+fdiv.s f5, f1, f2
+fmul.s f6, f5, f3
+fadd.s f0, f0, f6
+
+# --- Término 4 ---
+li f2, 7.0
+li f3, -1.0
+fdiv.s f5, f1, f2
+fmul.s f6, f5, f3
+fadd.s f0, f0, f6
+
+# --- Término 5 ---
+li f2, 9.0
+li f3, 1.0
+fdiv.s f5, f1, f2
+fmul.s f6, f5, f3
+fadd.s f0, f0, f6
+
+# --- Término 6 ---
+li f2, 11.0
+li f3, -1.0
+fdiv.s f5, f1, f2
+fmul.s f6, f5, f3
+fadd.s f0, f0, f6
+
+# Multiplicar por 4
+li f1, 4.0
+fmul.s f0, f0, f1    # f0 = f0 * 4
+
+# Imprimir resultado aproximado de π
+fmv.s f10, f0
+li a7, 2
+ecall
+
+# Terminar
+li a7, 10
+ecall

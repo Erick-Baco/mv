@@ -1,7 +1,7 @@
 #from service.executor import InstructionExecutor
 #from service.parser import InstructionParser
-from src.service.executor import InstructionExecutor
-from src.service.parser import InstructionParser
+from service.executor import InstructionExecutor
+from service.parser import InstructionParser
 
 
 class RiscVSimulator:
@@ -15,6 +15,7 @@ class RiscVSimulator:
 
     def _init_internal(self):
         self.registers = [0] * 32
+        self.fregisters = [0.0] * 32
         self.memory = {}
         self.pc = 0
         self.instructions = {}
@@ -41,6 +42,36 @@ class RiscVSimulator:
                     continue
             self.instructions[address] = line
             address += 4
+
+    def get_state_text(self):
+            lines = ["Registros enteros:"]
+            for i in range(32):
+                alias = ""
+                if i == 0: alias = "zero"
+                elif i == 1: alias = "ra"
+                elif i == 2: alias = "sp"
+                elif i == 10: alias = "a0"
+                elif i == 17: alias = "a7"
+                if alias:
+                    lines.append(f"x{i} ({alias}): {self.registers[i]}")
+                else:
+                    lines.append(f"x{i}: {self.registers[i]}")
+
+            lines.append("\nRegistros flotantes:")
+            for i in range(32):
+                lines.append(f"f{i}: {self.fregisters[i]:.4f}")
+
+            return "\n".join(lines)
+    
+    def limpiar_comentarios(codigo_raw: str) -> str:
+        """Devuelve el código sin todo lo que aparezca después de '#'."""
+        lineas_limpias = []
+        for linea in codigo_raw.split('\n'):
+            sin_com = linea.split('#', 1)[0].rstrip()
+            if sin_com:                       # descarta líneas vacías
+                lineas_limpias.append(sin_com)
+        return '\n'.join(lineas_limpias)
+
 
     def run(self):
         self.running = True

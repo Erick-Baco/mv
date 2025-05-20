@@ -6,6 +6,13 @@ class InstructionParser:
 
     def parse_register(self, reg_str):
         reg_str = reg_str.strip(',')
+        # Soporte para registros flotantes f0 - f31
+        if reg_str.startswith('f'):
+            try:
+                return int(reg_str[1:])  # Devuelve el número como índice para fregisters
+            except:
+                raise ValueError(f"Registro flotante no reconocido: {reg_str}")
+            
         if reg_str == 'zero':
             return 0
         elif reg_str == 'ra':
@@ -40,6 +47,12 @@ class InstructionParser:
         rs1 = self.parse_register(args[1])
         imm = int(args[2])
         return rd, rs1, imm
+    
+    def parse_r_type_2regs(self, args):
+        rd = self.parse_register(args[0])
+        rs = self.parse_register(args[1])
+        return rd, rs
+
 
     def parse_load(self, args):
         rd = self.parse_register(args[0])
